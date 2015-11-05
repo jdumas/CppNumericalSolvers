@@ -24,7 +24,10 @@ class Problem {
   Vector<T> upperBound;
 
   Problem() {}
-
+  /**
+   * @brief applies lowerBound and upperBound on x (if any)
+   */
+  virtual void applyBounds(Vector<T> & x) {}
   /**
    * @brief returns objective value in x
    * @details [long description]
