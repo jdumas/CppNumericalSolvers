@@ -27,6 +27,7 @@ class GradientDescentSolver : public ISolver<T, 1> {
       objFunc.gradient(x0, direction);
       const T rate = MoreThuente<T, decltype(objFunc), 1>::linesearch(x0, -direction, objFunc) ;
       x0 = x0 - rate * direction;
+      objFunc.applyBounds(x0);
       gradNorm = direction.template lpNorm<Eigen::Infinity>();
       // std::cout << "iter: "<<iter<< " f = " <<  objFunc.value(x0) << " ||g||_inf "<<gradNorm  << std::endl;
       iter++;
