@@ -15,19 +15,59 @@ template<typename T>
 class Problem {
  protected:
 
+  bool hasLowerBound_ = false;
+  bool hasUpperBound_ = false;
+
+  Vector<T> lowerBound_;
+  Vector<T> upperBound_;
+
  public:
 
-  bool hasLowerBound = false;
-  bool hasUpperBound = false;
-
-  Vector<T> lowerBound;
-  Vector<T> upperBound;
-
   Problem() {}
+
+  void setBoxConstraint(Vector<T>  lb, Vector<T>  ub) {
+    setLowerBound(lb);
+    setUpperBound(ub);
+  }
+
+  void setLowerBound(Vector<T>  lb) {
+    lowerBound_    = lb;
+    hasLowerBound_ = true;
+  }
+
+  void setUpperBound(Vector<T>  ub) {
+    upperBound_ = ub;
+    hasUpperBound_ = true;
+  }
+
+  bool hasLowerBound() {
+    return hasLowerBound_;
+  }
+
+  bool hasUpperBound() {
+    return hasUpperBound_;
+  }
+
+  Vector<T> lowerBound() {
+    return lowerBound_;
+  }
+
+  Vector<T> upperBound() {
+    return upperBound_;
+  }
+
   /**
    * @brief applies lowerBound and upperBound on x (if any)
    */
-  virtual void applyBounds(Vector<T> & x) {}
+  virtual void applyBounds(Vector<T> & x) {
+    if (hasUpperBound()) {
+      x = x.cwiseMin(upperBound());
+    }
+    if (hasLowerBound()) {
+      x = x.cwiseMax(lowerBound());
+    }
+  }
+
   /**
    * @brief returns objective value in x
    * @details [long description]
@@ -112,7 +152,6 @@ class Problem {
     // accuracy can be 0, 1, 2, 3
     const T eps = 2.2204e-8;
     const size_t D = x.rows();
-    const int idx = (accuracy-3)/2;
     const std::vector< std::vector <T>> coeff =
     { {1, -1}, {1, -8, 8, -1}, {-1, 9, -45, 45, -9, 1}, {3, -32, 168, -672, 672, -168, 32, -3} };
     const std::vector< std::vector <T>> coeff2 =
