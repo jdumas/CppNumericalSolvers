@@ -28,6 +28,8 @@ class Problem {
 
   Problem() {}
 
+  virtual ~Problem() = default;
+
   void setBoxConstraint(Vector<T>  lb, Vector<T>  ub) {
     setLowerBound(lb);
     setUpperBound(ub);
@@ -60,9 +62,9 @@ class Problem {
   }
 
   /**
-   * @brief applies lowerBound and upperBound on x (if any)
+   * @brief applies box constraints on x (if any)
    */
-  virtual void applyBounds(Vector<T> & x) {
+  virtual void clamp(Vector<T> & x) {
     if (hasUpperBound()) {
       x = x.cwiseMin(upperBound());
     }
