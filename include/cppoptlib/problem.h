@@ -1,12 +1,15 @@
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
+#include <vector>
+
 #include <Eigen/Dense>
-#ifndef MATLAB
-#include "../gtest/gtest.h"
-#else
+
+#if defined(MATLAB) || defined(NDEBUG)
 #define EXPECT_NEAR(x, y, z)
-#endif /* MATLAB */
+#else
+#include "../gtest/googletest/include/gtest/gtest.h"
+#endif /* RELEASE MODE */
 
 #include "meta.h"
 
@@ -117,7 +120,7 @@ class Problem {
     bool correct = true;
 
     for (int d = 0; d < D; ++d) {
-      T scale = std::max(std::max(fabs(actual_grad[d]), fabs(expected_grad[d])), (T)1.);
+      T scale = std::max((std::max(fabs(actual_grad[d]), fabs(expected_grad[d]))), 1.);
       EXPECT_NEAR(actual_grad[d], expected_grad[d], 1e-2 * scale);
       if(fabs(actual_grad[d]-expected_grad[d])>1e-2 * scale)
         correct = false;
@@ -138,7 +141,7 @@ class Problem {
     finiteHessian(x, expected_hessian, accuracy);
     for (int d = 0; d < D; ++d) {
       for (int e = 0; e < D; ++e) {
-        T scale = std::max(std::max(fabs(actual_hessian(d, e)), fabs(expected_hessian(d, e))), (T)1.);
+        T scale = std::max(static_cast<T>(std::max(fabs(actual_hessian(d, e)), fabs(expected_hessian(d, e)))), (T)1.);
         EXPECT_NEAR(actual_hessian(d, e), expected_hessian(d, e), 1e-1 * scale);
         if(fabs(actual_hessian(d, e)- expected_hessian(d, e))>1e-1 * scale)
         correct = false;
@@ -150,7 +153,7 @@ class Problem {
 
   virtual void finiteGradient(const  Vector<T> &x, Vector<T> &grad, int accuracy = 0) final {
     // accuracy can be 0, 1, 2, 3
-    const T eps = 2.2204e-8;
+    const T eps = 2.2204e-6;
     const size_t D = x.rows();
     const std::vector< std::vector <T>> coeff =
     { {1, -1}, {1, -8, 8, -1}, {-1, 9, -45, 45, -9, 1}, {3, -32, 168, -672, 672, -168, 32, -3} };
@@ -173,7 +176,7 @@ class Problem {
   }
 
   virtual void finiteHessian(const Vector<T> & x, Matrix<T> & hessian, int accuracy = 0) final {
-    const T eps = 2.2204e-08;
+    const T eps = std::numeric_limits<T>::epsilon()*10e7;
     const size_t DIM = x.rows();
 
     if(accuracy == 0) {

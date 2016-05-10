@@ -52,7 +52,7 @@ class NelderMeadSolver : public ISolver<T, 0> {
     sort(index.begin(), index.end(), [&](int a, int b)-> bool { return f[a] < f[b]; });
 
     int iter = 0;
-    const int maxIter = this->settings_.maxIter*DIM;
+    const int maxIter = this->m_stop.iterations*DIM;
     while (iter < maxIter) {
 
       // conv-check
@@ -67,8 +67,8 @@ class NelderMeadSolver : public ISolver<T, 0> {
         if (tmp2 > max2)
           max2 = tmp2;
       }
-      const T tt1 = std::max(1.e-04, 10 * std::nextafter<T>(f[index[0]], std::numeric_limits<T>::epsilon()) - f[index[0]]);
-      const T tt2 = std::max(1.e-04, 10 * (std::nextafter<T>(x0.col(index[0]).maxCoeff(), std::numeric_limits<T>::epsilon())
+      const T tt1 = std::max(static_cast<T>(1.e-04), 10 * std::nextafter(f[index[0]], std::numeric_limits<T>::epsilon()) - f[index[0]]);
+      const T tt2 = std::max(static_cast<T>(1.e-04), 10 * (std::nextafter(x0.col(index[0]).maxCoeff(), std::numeric_limits<T>::epsilon())
                     - x0.col(index[0]).maxCoeff()));
 
       // max(||x - shift(x) ||_inf ) <= tol,

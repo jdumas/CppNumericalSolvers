@@ -28,8 +28,14 @@ int main(int argc, char const *argv[]) {
 
     Simple<double> f;
     Vector<double> x(2); x << -1, 2;
+
+    Criteria<double> crit = Criteria<double>::defaults(); // Create a Criteria class to set the solver's stop conditions
+    crit.iterations = 10000;                              // Increase the number of allowed iterations
     BfgsSolver<double> solver;
+    solver.setStopCriteria(crit);
     solver.minimize(f, x);
     std::cout << "f in argmin " << f(x) << std::endl;
+    std::cout << "Solver status: " << solver.status() << std::endl;
+    std::cout << "Final criteria values: " << std::endl << solver.criteria() << std::endl;
     return 0;
 }

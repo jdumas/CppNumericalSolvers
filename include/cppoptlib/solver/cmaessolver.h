@@ -47,12 +47,12 @@ class CMAesSolver : public ISolver<T, 1> {
   Vector<T> sampleMvn(Vector<T> &mean, Matrix<T> &covar) {
 
     Matrix<T> normTransform;
-    Eigen::LLT<Eigen::MatrixXd> cholSolver(covar);
+    Eigen::LLT<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> > cholSolver(covar);
 
     if (cholSolver.info() == Eigen::Success) {
       normTransform = cholSolver.matrixL();
     } else {
-      Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigenSolver(covar);
+      Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> > eigenSolver(covar);
       normTransform = eigenSolver.eigenvectors() * eigenSolver.eigenvalues().cwiseSqrt().asDiagonal();
     }
 
@@ -62,7 +62,7 @@ class CMAesSolver : public ISolver<T, 1> {
       stdNormDistr[i] = d(gen);
     }
 
-    Eigen::MatrixXd samples = normTransform * stdNormDistr + mean;
+    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> samples = normTransform * stdNormDistr + mean;
 
     return samples;
   }
@@ -104,7 +104,7 @@ class CMAesSolver : public ISolver<T, 1> {
 
     const T sigma0   = 0.3 * (VarMax - VarMin);
     const T cs       = (mu_eff + 2.) / (DIM + mu_eff + 5.);
-    const T ds       = 1. + cs + 2.*std::max(sqrt((mu_eff - 1) / (DIM + 1)) - 1, (T)0.);
+    const T ds       = 1. + cs + 2.*std::max((T)sqrt((mu_eff - 1) / (DIM + 1)) - 1, (T)0.);
     const T ENN      = sqrt(DIM) * (1 - 1. / (4.*DIM) + 1. / (21.*DIM * DIM));
 
     const T cc       = (4. + mu_eff / DIM) / (4. + DIM + 2.*mu_eff / DIM);
@@ -142,7 +142,7 @@ class CMAesSolver : public ISolver<T, 1> {
     Vector<T> zeroVectorTemplate = Vector<T>::Zero(DIM);
 
     // CMA-ES Main Loop
-    for (size_t curIter = 0; curIter < this->settings_.maxIter; ++curIter) {
+    for (size_t curIter = 0; curIter < this->m_stop.iterations; ++curIter) {
       std::vector<individual> pop;
 
       for (int i = 0; i < populationSize; ++i) {
@@ -167,7 +167,7 @@ class CMAesSolver : public ISolver<T, 1> {
       // printf("%i best cost so far %f\n", curIter, bestCostSoFar );
 
       // any further update?
-      if (curIter == this->settings_.maxIter - 2)
+      if (curIter == this->m_stop.iterations - 2)
         break;
 
       // update mean (TODO: matrix-vec-multiplication with permutation matrix?)
