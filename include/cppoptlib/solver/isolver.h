@@ -31,6 +31,8 @@ public:
         m_current.reset();
     }
 
+	virtual ~ISolver() = default;
+
     void setStopCriteria(const TCriteria &s) { m_stop = s; }
     const TCriteria &criteria() { return m_current; }
     const Status &status() { return m_status; }
