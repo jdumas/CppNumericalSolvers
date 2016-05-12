@@ -53,11 +53,11 @@ class Problem {
     return hasUpperBound_;
   }
 
-  Vector<T> lowerBound() {
+  const Vector<T> & lowerBound() {
     return lowerBound_;
   }
 
-  Vector<T> upperBound() {
+  const Vector<T> & upperBound() {
     return upperBound_;
   }
 
