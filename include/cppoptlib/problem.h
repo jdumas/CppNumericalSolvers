@@ -64,7 +64,7 @@ class Problem {
   /**
    * @brief applies box constraints on x (if any)
    */
-  virtual void clamp(Vector<T> & x) {
+  virtual void clamp(Ref<Vector<T> > x) {
     if (hasUpperBound()) {
       x = x.cwiseMin(upperBound());
     }
@@ -80,7 +80,7 @@ class Problem {
    * @param x [description]
    * @return [description]
    */
-  virtual T value(const  Vector<T> &x) = 0;
+  virtual T value(ConstRef<Vector<T> > x) = 0;
   /**
    * @brief overload value for nice syntax
    * @details [long description]
@@ -88,7 +88,7 @@ class Problem {
    * @param x [description]
    * @return [description]
    */
-  T operator()(const  Vector<T> &x) {
+  T operator()(ConstRef<Vector<T> > x) {
     return value(x);
   }
   /**
@@ -97,7 +97,7 @@ class Problem {
    *
    * @param grad [description]
    */
-  virtual void gradient(const  Vector<T> &x,  Vector<T> &grad) {
+  virtual void gradient(ConstRef<Vector<T> > x, Ref<Vector<T> > grad) {
     finiteGradient(x, grad);
   }
 
@@ -105,12 +105,12 @@ class Problem {
    * @brief This computes the hessian
    * @details should be overwritten by symbolic hessian, if solver relies on hessian
    */
-  virtual void hessian(const Vector<T> & x, Matrix<T> & hessian) {
+  virtual void hessian(ConstRef<Vector<T> > x, Ref<Matrix<T> > hessian) {
     finiteHessian(x, hessian);
 
   }
 
-  virtual bool checkGradient(const Vector<T> & x, int accuracy = 3) {
+  virtual bool checkGradient(ConstRef<Vector<T> > x, int accuracy = 3) {
     // TODO: check if derived class exists:
     // int(typeid(&Rosenbrock<double>::gradient) == typeid(&Problem<double>::gradient)) == 1 --> overwritten
     const int D = x.rows();
@@ -131,7 +131,7 @@ class Problem {
 
   }
 
-  virtual bool checkHessian(const Vector<T> & x, int accuracy = 3) {
+  virtual bool checkHessian(ConstRef<Vector<T> > x, int accuracy = 3) {
     // TODO: check if derived class exists:
     // int(typeid(&Rosenbrock<double>::gradient) == typeid(&Problem<double>::gradient)) == 1 --> overwritten
     const int D = x.rows();
@@ -153,7 +153,7 @@ class Problem {
 
   }
 
-  virtual void finiteGradient(const  Vector<T> &x, Vector<T> &grad, int accuracy = 0) final {
+  virtual void finiteGradient(ConstRef<Vector<T> > x, Ref<Vector<T> > grad, int accuracy = 0) final {
     // accuracy can be 0, 1, 2, 3
     const T eps = 2.2204e-6;
     const size_t D = x.rows();
@@ -177,7 +177,7 @@ class Problem {
     grad = finiteDiff;
   }
 
-  virtual void finiteHessian(const Vector<T> & x, Matrix<T> & hessian, int accuracy = 0) final {
+  virtual void finiteHessian(ConstRef<Vector<T> > x, Ref<Matrix<T> > hessian, int accuracy = 0) final {
     const T eps = std::numeric_limits<T>::epsilon()*10e7;
     const size_t DIM = x.rows();
 

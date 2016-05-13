@@ -13,6 +13,12 @@ using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 template <typename T>
 using Matrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
+template <typename T>
+using Ref = Eigen::Ref<T>;
+
+template <typename T>
+using ConstRef = const Eigen::Ref<const T>;
+
 enum class DebugLevel { None = 0, Low, High };
 enum class Status {
     NotStarted = -1,
