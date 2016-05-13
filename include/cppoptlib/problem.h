@@ -2,6 +2,7 @@
 #define PROBLEM_H
 
 #include <vector>
+#include <memory>
 
 #include <Eigen/Dense>
 
@@ -23,6 +24,8 @@ class Problem {
 
   Vector<T> lowerBound_;
   Vector<T> upperBound_;
+
+  std::vector<std::shared_ptr<Problem<T>>> constraints_;
 
  public:
 
@@ -59,6 +62,14 @@ class Problem {
 
   const Vector<T> & upperBound() {
     return upperBound_;
+  }
+
+  void addConstraint(std::shared_ptr<Problem<T> > c) {
+  	constraints_.emplace_back(c);
+  }
+
+  const std::vector<std::shared_ptr<Problem<T>>> & constraints () const {
+  	return constraints_;
   }
 
   /**
