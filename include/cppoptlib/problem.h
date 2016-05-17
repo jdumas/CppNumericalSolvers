@@ -72,6 +72,8 @@ class Problem {
   	return constraints_;
   }
 
+  virtual bool checkStop() const { return false; }
+
   /**
    * @brief applies box constraints on x (if any)
    */

@@ -46,6 +46,7 @@ class ConjugatedGradientDescentSolver : public ISolver<T, 1> {
       // std::cout << "iter: "<<iter<< " f = " <<  objFunc.value(x0) << " ||g||_inf "<<gradNorm   << std::endl;
       ++this->m_current.iterations;
       this->m_status = checkConvergence(this->m_stop, this->m_current);
+      if (objFunc.checkStop()) { break; }
     } while (this->m_status == Status::Continue);
 
   }
