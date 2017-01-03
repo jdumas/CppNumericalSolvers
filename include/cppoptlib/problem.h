@@ -131,6 +131,9 @@ class Problem {
     Vector<T> expected_grad(D);
     gradient(x, actual_grad);
     finiteGradient(x, expected_grad, accuracy);
+    // int n = std::min(21, (int) x.size());
+    // std::cout << actual_grad.head(n).transpose() << std::endl;
+    // std::cout << expected_grad.head(n).transpose() << std::endl;
 
     bool correct = true;
 
@@ -166,28 +169,56 @@ class Problem {
 
   }
 
-  virtual void finiteGradient(ConstRef<Vector<T> > x, Ref<Vector<T> > grad, int accuracy = 0) final {
+  // virtual void finiteGradient2(ConstRef<Vector<T> > x, Ref<Vector<T> > grad, int accuracy = 0) final {
+  //   // accuracy can be 0, 1, 2, 3
+  //   const T eps = 2.2204e-6;
+  //   const size_t D = x.rows();
+  //   const std::vector< std::vector <T>> coeff =
+  //   { {1, -1}, {1, -8, 8, -1}, {-1, 9, -45, 45, -9, 1}, {3, -32, 168, -672, 672, -168, 32, -3} };
+  //   const std::vector< std::vector <T>> coeff2 =
+  //   { {1, -1}, {-2, -1, 1, 2}, {-3, -2, -1, 1, 2, 3}, {-4, -3, -2, -1, 1, 2, 3, 4} };
+  //   const std::vector <T> dd = {2, 12, 60, 840};
+
+  //   Vector<T> finiteDiff(D);
+  //   for (size_t d = 0; d < D; d++) {
+  //     finiteDiff[d] = 0;
+  //     for (int s = 0; s < 2*(accuracy+1); ++s)
+  //     {
+  //       Vector<T> xx = x.eval();
+  //       xx[d] += coeff2[accuracy][s]*eps;
+  //       finiteDiff[d] += coeff[accuracy][s]*value(xx);
+  //     }
+  //     finiteDiff[d] /= (dd[accuracy]* eps);
+  //   }
+  //   grad = finiteDiff;
+  // }
+
+  void finiteGradient(ConstRef<Vector<T> > x, Ref<Vector<T> > grad, int accuracy = 0) {
     // accuracy can be 0, 1, 2, 3
     const T eps = 2.2204e-6;
-    const size_t D = x.rows();
-    const std::vector< std::vector <T>> coeff =
-    { {1, -1}, {1, -8, 8, -1}, {-1, 9, -45, 45, -9, 1}, {3, -32, 168, -672, 672, -168, 32, -3} };
-    const std::vector< std::vector <T>> coeff2 =
-    { {1, -1}, {-2, -1, 1, 2}, {-3, -2, -1, 1, 2, 3}, {-4, -3, -2, -1, 1, 2, 3, 4} };
-    const std::vector <T> dd = {2, 12, 60, 840};
+    static const std::array<std::vector<T>, 4> coeff =
+    { { {1, -1}, {1, -8, 8, -1}, {-1, 9, -45, 45, -9, 1}, {3, -32, 168, -672, 672, -168, 32, -3} } };
+    static const std::array<std::vector<T>, 4> coeff2 =
+    { { {1, -1}, {-2, -1, 1, 2}, {-3, -2, -1, 1, 2, 3}, {-4, -3, -2, -1, 1, 2, 3, 4} } };
+    static const std::array<T, 4> dd = {2, 12, 60, 840};
 
-    Vector<T> finiteDiff(D);
-    for (size_t d = 0; d < D; d++) {
-      finiteDiff[d] = 0;
-      for (int s = 0; s < 2*(accuracy+1); ++s)
+    grad.resize(x.rows());
+    Vector<T> xx = x.eval();
+
+    const int innerSteps = 2*(accuracy+1);
+    const T ddVal = dd[accuracy]*eps;
+
+    for (size_t d = 0; d < x.rows(); d++) {
+      grad[d] = 0;
+      for (int s = 0; s < innerSteps; ++s)
       {
-        Vector<T> xx = x.eval();
+        T tmp = xx[d];
         xx[d] += coeff2[accuracy][s]*eps;
-        finiteDiff[d] += coeff[accuracy][s]*value(xx);
+        grad[d] += coeff[accuracy][s]*value(xx);
+        xx[d] = tmp;
       }
-      finiteDiff[d] /= (dd[accuracy]* eps);
+      grad[d] /= ddVal;
     }
-    grad = finiteDiff;
   }
 
   virtual void finiteHessian(ConstRef<Vector<T> > x, Ref<Matrix<T> > hessian, int accuracy = 0) final {
